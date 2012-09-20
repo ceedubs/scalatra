@@ -14,7 +14,7 @@ object ScalatraBuild extends Build {
   lazy val scalatraSettings = Defaults.defaultSettings ++ ls.Plugin.lsSettings ++ Seq(
     organization := "org.scalatra",
     version := "%s.0-SNAPSHOT" format majorVersion,
-    scalaVersion := "2.9.2",
+    scalaVersion := "2.10.0-M7",
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     javacOptions ++= Seq("-target", "1.6", "-source", "1.6"),
     manifestSetting,
@@ -35,7 +35,7 @@ object ScalatraBuild extends Build {
     ),
     aggregate = Seq(scalatraCore, scalatraAuth, scalatraFileupload, scalatraDatabinding,
       scalatraScalate, scalatraJson, scalatraSlf4j, //scalatraAtmosphere,
-      scalatraTest, scalatraScalatest, scalatraSpecs, scalatraSpecs2,
+      scalatraTest, scalatraScalatest, scalatraSpecs2,
       scalatraExample, scalatraAkka, scalatraSwagger, scalatraJetty,
       scalatraCommon)
   )
@@ -63,7 +63,6 @@ object ScalatraBuild extends Build {
     )
   ) dependsOn(
     scalatraSpecs2 % "test->compile",
-    scalatraSpecs % "test->compile",
     scalatraScalatest % "test->compile",
     scalatraCommon % "compile;test->test"
   )
@@ -130,7 +129,7 @@ object ScalatraBuild extends Build {
     settings = scalatraSettings ++ Seq(
       libraryDependencies ++= Seq(
         "commons-validator"       % "commons-validator"  % "1.4.0",
-        "io.backchat.inflector"  %% "scala-inflector"    % "1.3.4"
+        "io.backchat.inflector"  %% "scala-inflector"    % "1.3.5-SNAPSHOT"
       ),
       libraryDependencies ++= Seq(scalaz, jodaTime, jodaConvert),
       initialCommands :=
@@ -189,18 +188,6 @@ object ScalatraBuild extends Build {
     )
   ) dependsOn(scalatraTest % "compile;test->test;provided->provided")
 
-  lazy val scalatraSpecs = Project(
-    id = "scalatra-specs",
-    base = file("specs"),
-    settings = scalatraSettings ++ Seq(
-      libraryDependencies += specs,
-      description := "Specs support for the Scalatra test framework",
-      // The one in Maven Central has a bad checksum for 2.8.2.
-      // Try ScalaTools first.
-      resolvers ~= { rs => ScalaToolsReleases +: rs }
-    )
-  ) dependsOn(scalatraTest % "compile;test->test;provided->provided")
-
   lazy val scalatraSpecs2 = Project(
     id = "scalatra-specs2",
     base = file("specs2"),
@@ -250,7 +237,7 @@ object ScalatraBuild extends Build {
 
     val base64 = "net.iharder" % "base64" % "2.3.8"
 
-    val backchatRl = "io.backchat.rl" %% "rl" % "0.3.2"
+    val backchatRl = "io.backchat.rl" %% "rl" % "0.3.3-SNAPSHOT"
 
     val akkaActor = "com.typesafe.akka" % "akka-actor" % "2.0.3"
     val akkaTestkit = "com.typesafe.akka" % "akka-testkit" % "2.0.3" % "test"
@@ -263,7 +250,7 @@ object ScalatraBuild extends Build {
 
     val httpMime   = "org.apache.httpcomponents" % "httpmime"   % "4.2"
 
-    val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % "0.6.9"
+    val grizzledSlf4j = "org.clapper" %% "grizzled-slf4j" % "1.0"
 
     def jettyDep(name: String) = "org.eclipse.jetty" % name % "8.1.3.v20120416"
 
@@ -285,15 +272,15 @@ object ScalatraBuild extends Build {
 
     val scalate = "org.fusesource.scalate" % "scalate-core" % "1.5.3"
 
-    val scalatest = "org.scalatest" %% "scalatest" % "1.8"
+    val scalatest = "org.scalatest" % "scalatest_2.10.0-M7" % "1.9-2.10.0-M7-B1"
 
     val testng = "org.testng" % "testng" % "6.7" % "optional"
 
     val guice = "com.google.inject" % "guice" % "3.0" % "optional"
 
-    val specs = "org.scala-tools.testing" %% "specs" % "1.6.9"
+    // val specs = "org.scala-tools.testing" %% "specs" % "1.6.9"
 
-    val specs2 = "org.specs2" %% "specs2" % "1.12"
+    val specs2 = "org.specs2" % "specs2_2.10.0-M7" % "1.12.1.1"
 
     val servletApi = "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" artifacts (Artifact("javax.servlet", "jar", "jar"))
 
@@ -305,7 +292,7 @@ object ScalatraBuild extends Build {
 
     val logback = "ch.qos.logback" % "logback-classic" % "1.0.6"
 
-    val scalaz = "org.scalaz" %% "scalaz-core" % "6.0.4"
+    val scalaz = "org.scalaz" % "scalaz-core_2.10.0-M7" % "6.0.4"
 
     val jodaTime = "joda-time" % "joda-time" % "2.1"
 
