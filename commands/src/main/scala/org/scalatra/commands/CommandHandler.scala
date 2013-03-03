@@ -7,6 +7,7 @@ import validation._
 import scalaz._
 import Scalaz._
 
+@deprecated("Use the more type-safe CommandExecutor instead", "2.2.1")
 trait CommandHandler { 
   @transient private[this] val commandLogger: Logger = Logger[this.type]
   def execute[S: Manifest](cmd: ModelCommand[S]): ModelValidation[S] = {

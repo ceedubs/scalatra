@@ -19,6 +19,8 @@ trait CommandSupport extends ParamsValueReaderProperties { this: ScalatraBase =>
   
   private[this] val commandFactories: mutable.ConcurrentMap[Class[_], () => Command] = new ConcurrentHashMap[Class[_], () => Command].asScala
 
+  protected[this] val commandExecutor = new ExceptionCatchingCommandExecutor
+
   def registerCommand[T <: Command](cmd: => T)(implicit mf: Manifest[T]) {
     commandFactories += (mf.erasure -> (() => cmd))
   }
@@ -65,7 +67,11 @@ trait CommandSupport extends ParamsValueReaderProperties { this: ScalatraBase =>
    */
   def ifValid[T <: CommandType](implicit mf: Manifest[T]): RouteMatcher = new CommandRouteMatcher[T]
 
+  def bindAndExecute[C <: CommandType, A](cmd: C)(handle: C => ModelValidation[A])(implicit request: HttpServletRequest,
+      mf: Manifest[C]): ModelValidation[A] = {
 
+    commandExecutor.execute(commandOrElse(cmd))(handle)
+  }
 }
 
 trait ParamsOnlyCommandSupport extends CommandSupport { this: ScalatraBase =>

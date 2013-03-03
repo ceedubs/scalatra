@@ -226,6 +226,17 @@ class CommandSupportSpec extends Specification with Mockito {
 
     matcher must not(beNull[RouteMatcher])
   }
+
+  "bind and execute a command" in {
+    implicit val req = mock[HttpServletRequest]
+    val command = new CommandSample
+    val page = new ScalatraPage
+    val res = page.bindAndExecute(command){ cmd =>
+      "jimmy".success
+    }: ModelValidation[String]
+    command.bound must beTrue
+    res must_== "jimmy".success
+  }
 }
 
 
