@@ -63,6 +63,12 @@ class CommandWithRequiredValuesValidation extends ParamsOnlyCommand {
 
 }
 
+class CommandWithOptionalValuesValidation extends ParamsOnlyCommand {
+  val name: Field[String] = asString("name")
+  val age: Field[Int] = bind[Int]("age")
+  val newsLetter: Field[Boolean] = bind[Boolean]("newsLetter")
+}
+
 class CommandSpec extends Specification {
 
   import org.scalatra.util.ParamsValueReaderProperties._
@@ -117,6 +123,14 @@ class CommandSpec extends Specification {
       val form2 = new CommandWithRequiredValuesValidation
       form2.bindTo(Map("name" -> "", "age" -> "0", "newsLetter" -> "true"))
       form2.isValid must beTrue
+    }
+
+    "Have a None value for optional fields that aren't populated" in {
+      val form = new CommandWithOptionalValuesValidation
+      form.bindTo(Map.empty[String, String])
+      form.name.value must beNone
+      form.age.value must beNone
+      form.newsLetter.value must beNone
     }
 
     "provide pluggable actions processed 'BEFORE' binding " in {
