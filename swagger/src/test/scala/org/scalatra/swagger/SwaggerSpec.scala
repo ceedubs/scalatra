@@ -22,6 +22,7 @@ class SwaggerSpec extends ScalatraSpec with JsonMatchers { def is = sequential ^
     "list store operations"                ! listStoreOperations ^
     "list user operations"                 ! listUserOperations  ^
     "list model elements in order"         ! checkModelOrder     ^
+    "mark options as not required"         ! notRequireOptions         ^
   end
   val apiInfo = ApiInfo(
       title = "Swagger Sample App",
@@ -89,7 +90,7 @@ class SwaggerSpec extends ScalatraSpec with JsonMatchers { def is = sequential ^
       case _:Throwable ⇒ None
     }
    
-  val propOrder = "category" :: "name" :: "id" :: "tags" :: "status" :: "photoUrls" :: Nil
+  val propOrder = "category" :: "name" :: "id" :: "tags" :: "status" :: "photoUrls":: "nickname" :: Nil
   def checkModelOrder = {
     get("/api-docs/pet") {
       val bd = JsonParser.parseOpt(body)
@@ -97,6 +98,18 @@ class SwaggerSpec extends ScalatraSpec with JsonMatchers { def is = sequential ^
         val j = bd.get
         val props = (j \ "models" \ "Pet" \ "properties").asInstanceOf[JObject].values.map { case (x,y) ⇒ x → y.asInstanceOf[Map[String,BigInt]].get("position").flatMap(x ⇒ parseInt(x.toString)).getOrElse(0) }.toList sortBy (_._2) map (_._1)
         props must_== propOrder
+      }
+    }
+  }
+
+  def notRequireOptions = {
+    get("/api-docs/pet") {
+      val bd = JsonParser.parseOpt(body)
+      bd must beSome[JValue] and {
+        val j = bd.get
+        val nickname = j \ "models" \ "Pet" \ "properties" \ "nickname"
+        ((nickname \ "type").extractOpt[String] must beSome("string")) and
+          ((nickname \ "required").extractOpt[Boolean] must beSome(false))
       }
     }
   }
@@ -439,7 +452,8 @@ case class Pet(@ApiModelProperty(position=3)id: Long,
                @ApiModelProperty(position=2)name: String, 
                @ApiModelProperty(position=6)photoUrls: List[String], 
                @ApiModelProperty(position=4)tags: List[Tag],
-               @ApiModelProperty(position=5, description = "pet status in the store", allowableValues = "available,pending,sold") status: String)
+               @ApiModelProperty(position=5, description = "pet status in the store", allowableValues = "available,pending,sold") status: String,
+               @ApiModelProperty(position=7, description = "nickname for the pet") nickname: Option[String])
 
 case class Tag(id: Long, name: String)
 case class Category(id: Long, name: String)
@@ -462,19 +476,19 @@ class PetData {
     Category(4, "Lions"))
 
   var pets = List(
-    Pet(1, categories(1), "Cat 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"),
-    Pet(2, categories(1), "Cat 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"),
-    Pet(3, categories(1), "Cat 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"),
+    Pet(1, categories(1), "Cat 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", Some("Gato Numero Uno")),
+    Pet(2, categories(1), "Cat 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", None),
+    Pet(3, categories(1), "Cat 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", None),
 
-    Pet(4, categories(0), "Dog 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"),
-    Pet(5, categories(0), "Dog 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"),
-    Pet(6, categories(0), "Dog 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"),
+    Pet(4, categories(0), "Dog 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", Some("Perro Numero Uno")),
+    Pet(5, categories(0), "Dog 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", None),
+    Pet(6, categories(0), "Dog 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", None),
 
-    Pet(7, categories(3), "Lion 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"),
-    Pet(8, categories(3), "Lion 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"),
-    Pet(9, categories(3), "Lion 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"),
+    Pet(7, categories(3), "Lion 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", None),
+    Pet(8, categories(3), "Lion 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", None),
+    Pet(9, categories(3), "Lion 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", None),
 
-    Pet(10, categories(2), "Rabbit 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available"))
+    Pet(10, categories(2), "Rabbit 1", List("url1", "url2"), List(Tag(1, "tag1"), Tag(2, "tag2")), "available", None))
 
   def getPetbyId(id: Long): Option[Pet] = pets.find(_.id == id)
 
